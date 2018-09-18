@@ -38,7 +38,7 @@ public class Broker extends Thread {
                 }
             }
         } catch (IOException ex) {
-            System.out.println("No se pudo establecer la conexion.");
+            System.out.println("*** No se pudo establecer la conexion. ***");
         } finally {
             try {
                 if (sourceServer != null) {

@@ -38,7 +38,7 @@ public class Publisher {
             } catch (IOException e) {
                 System.out.println("*** No fue posible realizar la conexion ***");
             }
-            /* String archiveName;
+            String archiveName;
             System.out.print("Ingrese el archivo que  contiene los eventos: ");
             BufferedReader nameBR = new BufferedReader(new InputStreamReader(System.in));
             archiveName = nameBR.readLine();
@@ -55,14 +55,7 @@ public class Publisher {
                     publisherOutput.println(emergencies.get(i));
                 }
                 cont++;
-            }*/
-            publisherOutput.println("Emergencia 1");
-            publisherOutput.println("Emergencia 2");
-            publisherOutput.println("Emergencia 3");
-            publisherOutput.println("Emergencia 4");
-            publisherOutput.println("Emergencia 5");
-            publisherOutput.println("Emergencia 6");
-            publisherOutput.close();
+            }
             brokerSocket.close();
         } catch (Exception e) {
             e.printStackTrace();
