@@ -32,12 +32,12 @@ class SourceBroker extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String informacion;
             while ((informacion = br.readLine()) != null) {
-                System.out.println("Noticia Recibida de " + brokerSocket.getInetAddress().getHostAddress() + ": " + informacion);
-                myBroker.enviarInfo(informacion);
-                out.write(informacion.getBytes());
+                System.out.println("======== Nueva emergencia! Fuente=>" + brokerSocket.getInetAddress()+":"+brokerSocket.getPort()+ ": " + informacion+" ============");
+                //myBroker.enviarInfo(informacion);
+                //out.write(informacion.getBytes());
             }
         } catch (IOException ex) {
-            System.out.println("Error");
+            System.out.println("*** Ha ocurrido un error ***");
         } finally {
             try {
                 in.close();

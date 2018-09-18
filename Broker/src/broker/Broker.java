@@ -16,47 +16,37 @@ import java.util.ArrayList;
  */
 public class Broker extends Thread {
 
-    ArrayList<Socket> clientConns = new ArrayList<Socket>();
-    int clientPort = 7897;
-    int sourcePort = 7987;
+    ArrayList<ClientBroker> clientConns = new ArrayList<ClientBroker>();
+    int openPort = 7987;
 
     public Broker() {
         start();
     }
 
     public void run() {
-        ServerSocket clientServer = null;
         ServerSocket sourceServer = null;
         try {
-            clientServer = new ServerSocket(clientPort);
-            sourceServer = new ServerSocket(sourcePort);
+            sourceServer = new ServerSocket(openPort);
             while (true) {
-                Socket newSource = sourceServer.accept();
-                Socket newClient = clientServer.accept();
-                if (!newSource.isClosed()) {
-                    new SourceBroker(this, newSource);
+                Socket newConnection = sourceServer.accept();
+                if (newConnection.getPort()>=53000 && newConnection.getPort()<54000) {
+                    System.out.println("Nuevo publicador: " + newConnection);
+                    new SourceBroker(this, newConnection);
+                } else if(newConnection.getPort()>=55000 && newConnection.getPort()<56000) {
+                    System.out.println("Nuevo suscriptor: " + newConnection);
+                    clientConns.add(new ClientBroker(this, newConnection));
                 }
-                if (!newClient.isClosed()) {
-                    clientConns.add(newClient);
-                }
-
             }
         } catch (IOException ex) {
             System.out.println("No se pudo establecer la conexion.");
         } finally {
             try {
-                if (clientServer != null && sourceServer != null) {
-                    clientServer.close();
+                if (sourceServer != null) {
                     sourceServer.close();
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
-
-    }
-
-    public void addClient(Socket clientSocket) {
-        clientConns.add(clientSocket);
     }
 }

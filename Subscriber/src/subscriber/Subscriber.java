@@ -5,66 +5,49 @@
  */
 package subscriber;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
  * @author diegogustavo
  */
-public class Subscriber extends Thread {
-
-    DataInputStream in;
-    DataOutputStream out;
-    Socket s;
-    String data;
+public class Subscriber {
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) { // args message and hostname
-        Subscriber c = new Subscriber();
-    }
-
-    /**
-     *
-     */
-    public Subscriber() {
+    public static void main(String args[]) {
+        // TODO code application logic here
+        String brokerIP = "127.0.0.1";
+        int brokerPort = 7987;
+        int localPort = ThreadLocalRandom.current().nextInt(55000, 56000 + 1);
         try {
-            int serverPort = 7897;
-            s = new Socket("127.0.0.1", serverPort);
-            in = new DataInputStream(s.getInputStream());
-            out = new DataOutputStream(s.getOutputStream());
-            this.start();
-        } catch (UnknownHostException e) {
-            System.out.println("Socket:" + e.getMessage());
-        } catch (EOFException e) {
-            System.out.println("EOF:" + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("readline:" + e.getMessage());
-        }
-    }
-
-    public void run() {
-        try {
-            out.writeUTF("PING");
-            data = in.readUTF();
-            System.out.println("Received: " + data);
-            System.out.println(s.toString());
-        } catch (IOException e) {
-            System.out.println("readline:" + e.getMessage());
-        } finally {
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (IOException e) {
-                    System.out.println("close:" + e.getMessage());
-                }
+            Socket brokerSocket = null;
+            PrintWriter clientOutput = null;
+            BufferedReader brokerInput = null;
+            InetAddress localAdd = InetAddress.getByName("127.0.0.1");
+            try {
+                brokerSocket = new Socket(brokerIP, brokerPort, localAdd, localPort);
+                clientOutput = new PrintWriter(brokerSocket.getOutputStream(),true);
+                brokerInput = new BufferedReader(new InputStreamReader(brokerSocket.getInputStream()));
+                System.out.println("Conectado a: " + brokerSocket);
+            } catch (UnknownHostException e) {
+                System.out.println("*** No fue posible realizar la conexion ***");
+            } catch (IOException e) {
+                System.out.println("*** No fue posible realizar la conexion ***");
             }
+            String preferencias;
+            String ciudad;
+            BufferedReader infoInput = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("1. /n2. /n3. /n4. /n5. ");
+            System.out.print("=> Ingrese las emergencias de su interes: ");
+            preferencias=infoInput.readLine();
+            System.out.print("=> Ingrese la ciudad donde habita: ");
+            ciudad=infoInput.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
