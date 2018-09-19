@@ -7,6 +7,7 @@ package subscriber;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -22,7 +23,7 @@ public class Subscriber {
         // TODO code application logic here
         String brokerIP = "127.0.0.1";
         int brokerPort = 0;
-        int localPort = localPort = ThreadLocalRandom.current().nextInt(55000, 56000 + 1);
+        int localPort = ThreadLocalRandom.current().nextInt(55000, 56000 + 1);
         try {
             Socket brokerSocket = null;
             PrintWriter clientOutput = null;
@@ -53,20 +54,39 @@ public class Subscriber {
             preferencias = infoInput.readLine();
             System.out.print("=> Ingrese la ciudad donde habita: ");
             ciudad = infoInput.readLine();
-            clientOutput.println(preferencias + "," + ciudad);
+            clientOutput.println(preferencias + " " + ciudad);
             while (true) {
-                try {
-                    System.out.println("=>Nuevo evento!\n==>" + brokerInput.readLine());
-                } catch (SocketException sE) {
+                if (brokerInput.readLine() == null) {
+                    ArrayList<Integer> attempts = new ArrayList<>();
+                    attempts.add(0);
+                    int cantAttempts = 0;
                     do {
+                        brokerSocket = null;
                         brokerPort = ThreadLocalRandom.current().nextInt(7980, 7985 + 1);
+                        localPort = ThreadLocalRandom.current().nextInt(55000, 56000 + 1);
                         try {
-                            brokerSocket = new Socket(brokerIP, brokerPort, localAdd, localPort);
+                            if (!attempts.contains(brokerPort)) {
+                                attempts.add(brokerPort);
+                                cantAttempts++;
+                                brokerSocket = new Socket(brokerIP, brokerPort, localAdd, localPort);
+                            }
                         } catch (IOException e) {
                             brokerSocket = null;
                         }
-                    } while (brokerSocket == null);
-                    clientOutput.println(preferencias + "," + ciudad);
+                        if (brokerSocket != null) {
+                            brokerInput = new BufferedReader(new InputStreamReader(brokerSocket.getInputStream()));
+                            clientOutput = new PrintWriter(brokerSocket.getOutputStream(), true);
+                            clientOutput.println(preferencias + " " + ciudad);
+                            break;
+                        }
+                        if(cantAttempts==6)
+                        {
+                            System.out.println("*** No hay ningun broker disponible!!! ***");
+                            System.exit(-1);
+                        }
+                    } while (cantAttempts < 6 && brokerSocket==null);
+                } else {
+                    System.out.println("=>Nuevo evento!\n==>" + brokerInput.readLine());
                 }
             }
         } catch (Exception e) {

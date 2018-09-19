@@ -39,13 +39,11 @@ public class Publisher {
                     brokerPort = ThreadLocalRandom.current().nextInt(7980, 7985 + 1);
                     localPort = ThreadLocalRandom.current().nextInt(53000, 54000 + 1);
                     try {
-                        //for (int attempt : attempts) {
                         if (!attempts.contains(brokerPort)) {
                             attempts.add(brokerPort);
                             cantAttempts++;
                             brokerSocket = new Socket(brokerIP, brokerPort, localAdd, localPort);
                         }
-                        //}
                     } catch (IOException e) {
                         brokerSocket = null;
                     }
@@ -83,7 +81,7 @@ public class Publisher {
                         publisherOutput.println(emergencies.get(cont));
                     }
                     cont++;
-                    Thread.sleep(10000);
+                    Thread.sleep(3000);
                 }
             }
             for (Socket brokerSocket : allBrokers) {

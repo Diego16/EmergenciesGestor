@@ -14,8 +14,8 @@ import java.net.Socket;
  */
 class SourceBroker extends Thread {
 
-    private Broker myBroker;
-    private Socket brokerSocket;
+    private final Broker myBroker;
+    private final Socket brokerSocket;
 
     public SourceBroker(Broker aBroker, Socket aSocket) {
         this.myBroker = aBroker;
@@ -24,24 +24,23 @@ class SourceBroker extends Thread {
     }
 
     public void run() {
-        InputStream in = null;
-        OutputStream out = null;
+        InputStream brokerInput = null;
+        OutputStream sourceOutput = null;
         try {
-            in = brokerSocket.getInputStream();
-            out = brokerSocket.getOutputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String informacion;
-            while ((informacion = br.readLine()) != null) {
-                System.out.println("======== Nueva emergencia! Fuente=>" + brokerSocket.getInetAddress()+":"+brokerSocket.getPort()+ ": " + informacion+" ============");
-                //myBroker.enviarInfo(informacion);
-                //out.write(informacion.getBytes());
+            brokerInput = brokerSocket.getInputStream();
+            sourceOutput = brokerSocket.getOutputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(brokerInput));
+            String newEmergency;
+            while ((newEmergency = br.readLine()) != null) {
+                System.out.println("===> Nueva emergencia! Fuente=>" + brokerSocket.getInetAddress() + ":" + brokerSocket.getPort() + ": " + newEmergency);
+                myBroker.sendEmergency(newEmergency);
             }
         } catch (IOException ex) {
             System.out.println("*** Ha ocurrido un error ***");
         } finally {
             try {
-                in.close();
-                out.close();
+                brokerInput.close();
+                sourceOutput.close();
                 brokerSocket.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
