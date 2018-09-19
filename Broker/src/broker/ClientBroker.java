@@ -12,7 +12,7 @@ import java.net.Socket;
  *
  * @author diegogustavo
  */
-public class ClientBroker extends Thread{
+public class ClientBroker extends Thread {
 
     private Broker myBroker;
     private Socket brokerSocket;
@@ -23,4 +23,7 @@ public class ClientBroker extends Thread{
         start();
     }
 
+    public void run() {
+        
+    }
 }

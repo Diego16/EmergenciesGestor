@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -17,23 +18,24 @@ import java.util.ArrayList;
 public class Broker extends Thread {
 
     ArrayList<ClientBroker> clientConns = new ArrayList<ClientBroker>();
-    int openPort = 7987;
+    int openPort = ThreadLocalRandom.current().nextInt(7980, 7985 + 1);
 
     public Broker() {
         start();
     }
 
     public void run() {
-        ServerSocket sourceServer = null;
+        ServerSocket brokerServer = null;
         try {
-            sourceServer = new ServerSocket(openPort);
+            brokerServer = new ServerSocket(openPort);
+            System.out.println("IP Broker: "+brokerServer.getInetAddress()+":"+brokerServer.getLocalPort());
             while (true) {
-                Socket newConnection = sourceServer.accept();
+                Socket newConnection = brokerServer.accept();
                 if (newConnection.getPort()>=53000 && newConnection.getPort()<54000) {
-                    System.out.println("Nuevo publicador: " + newConnection);
+                    System.out.println("Nuevo publicador: " + newConnection.getInetAddress()+":"+newConnection.getPort());
                     new SourceBroker(this, newConnection);
                 } else if(newConnection.getPort()>=55000 && newConnection.getPort()<56000) {
-                    System.out.println("Nuevo suscriptor: " + newConnection);
+                    System.out.println("Nuevo suscriptor: " + newConnection.getInetAddress()+":"+newConnection.getPort());
                     clientConns.add(new ClientBroker(this, newConnection));
                 }
             }
@@ -41,8 +43,8 @@ public class Broker extends Thread {
             System.out.println("*** No se pudo establecer la conexion. ***");
         } finally {
             try {
-                if (sourceServer != null) {
-                    sourceServer.close();
+                if (brokerServer != null) {
+                    brokerServer.close();
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
